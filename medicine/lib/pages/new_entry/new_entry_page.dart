@@ -31,21 +31,25 @@ class _NewEntryPageBody extends StatefulWidget {
 class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
   late TextEditingController nameController;
   late TextEditingController dosageController;
+
+  late NewEntryBloc _newEntryBloc;
   late GlobalKey<ScaffoldState> _scaffoldKey;
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    dosageController.dispose();
+    _newEntryBloc.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     nameController = TextEditingController();
     dosageController = TextEditingController();
+    _newEntryBloc = NewEntryBloc();
     _scaffoldKey = GlobalKey<ScaffoldState>();
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    dosageController.dispose();
-    super.dispose();
   }
 
   @override
@@ -56,94 +60,98 @@ class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
       appBar: AppBar(
         title: const Text("Add New"),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(2.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const PanelTitle(
-              title: "Medicine Name",
-              isRequired: true,
-            ),
-            TextFormField(
-              maxLength: 12,
-              controller: nameController,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+      body: Provider<NewEntryBloc>.value(
+        value: _newEntryBloc,
+        child: Padding(
+          padding: EdgeInsets.all(2.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const PanelTitle(
+                title: "Medicine Name",
+                isRequired: true,
               ),
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(color: kOtherColor),
-            ),
-            const PanelTitle(
-              title: "Dosage in mg",
-              isRequired: false,
-            ),
-            TextFormField(
-              maxLength: 12,
-              controller: dosageController,
-              textCapitalization: TextCapitalization.words,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
+              TextFormField(
+                maxLength: 12,
+                controller: nameController,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: kOtherColor),
               ),
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(color: kOtherColor),
-            ),
-            SizedBox(
-              height: 2.h,
-            ),
-            const PanelTitle(title: "Medicine Type", isRequired: false),
-            Padding(
-              padding: EdgeInsets.only(top: 1.h),
-              child: Consumer<NewEntryBloc>(
-                builder: (context, newEntryBloc, _) {
-                  return StreamBuilder<MedicineType>(
-                    stream: newEntryBloc.selectedMedicineType,
+              const PanelTitle(
+                title: "Dosage in mg",
+                isRequired: false,
+              ),
+              TextFormField(
+                maxLength: 12,
+                controller: dosageController,
+                textCapitalization: TextCapitalization.words,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: kOtherColor),
+              ),
+              SizedBox(
+                height: 2.h,
+              ),
+             const PanelTitle(title: 'Medicine Type', isRequired: false),
+                Padding(
+                  padding: EdgeInsets.only(top: 1.h),
+                  child: StreamBuilder<MedicineType>(
+                    //new entry block
+                    stream: _newEntryBloc.selectedMedicineType,
                     builder: (context, snapshot) {
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          //not yet clickable?
                           MedicineTypeColumn(
-                            medicineType: MedicineType.Bottle,
-                            name: 'Bottle',
-                            iconValue: 'assets/icons/bottle.svg',
-                            isSelected: snapshot.data == MedicineType.Bottle,
-                          ),
+                              medicineType: MedicineType.Bottle,
+                              name: 'Bottle',
+                              iconValue: 'assets/icons/bottle.svg',
+                              isSelected: snapshot.data == MedicineType.Bottle
+                                  ? true
+                                  : false),
                           MedicineTypeColumn(
-                            medicineType: MedicineType.Pill,
-                            name: 'Pill',
-                            iconValue: 'assets/icons/pill.svg',
-                            isSelected: snapshot.data == MedicineType.Pill,
-                          ),
+                              medicineType: MedicineType.Pill,
+                              name: 'Pill',
+                              iconValue: 'assets/icons/pill.svg',
+                              isSelected: snapshot.data == MedicineType.Pill
+                                  ? true
+                                  : false),
                           MedicineTypeColumn(
-                            medicineType: MedicineType.Syringe,
-                            name: 'Syringe',
-                            iconValue: 'assets/icons/syringe.svg',
-                            isSelected: snapshot.data == MedicineType.Syringe,
-                          ),
+                              medicineType: MedicineType.Syringe,
+                              name: 'Syringe',
+                              iconValue: 'assets/icons/syringe.svg',
+                              isSelected: snapshot.data == MedicineType.Syringe
+                                  ? true
+                                  : false),
                           MedicineTypeColumn(
-                            medicineType: MedicineType.Tablet,
-                            name: 'Tablet',
-                            iconValue: 'assets/icons/tablet.svg',
-                            isSelected: snapshot.data == MedicineType.Tablet,
-                          ),
+                              medicineType: MedicineType.Tablet,
+                              name: 'Tablet',
+                              iconValue: 'assets/icons/tablet.svg',
+                              isSelected: snapshot.data == MedicineType.Tablet
+                                  ? true
+                                  : false),
                         ],
                       );
                     },
-                  );
-                },
-              ),
-            ),
-            const PanelTitle(title: 'Interval Selection', isRequired: true),
-            const IntervalSelection(),
-               const PanelTitle(title: 'Starting Time', isRequired: true),
+                  ),
+                ),
+              const PanelTitle(title: 'Interval Selection', isRequired: true),
+              const IntervalSelection(),
+              const PanelTitle(title: 'Starting Time', isRequired: true),
               const SelectTime(),
-                SizedBox(
+              SizedBox(
                 height: 2.h,
               ),
               Padding(
@@ -155,29 +163,29 @@ class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
                   width: 80.w,
                   height: 6.h,
                   child: TextButton(
-                    style:  TextButton.styleFrom(
-                      backgroundColor:  kPrimaryColor,
+                    style: TextButton.styleFrom(
+                      backgroundColor: kPrimaryColor,
                       shape: const StadiumBorder(),
                     ),
                     child: Center(
-                      child: Text('Confirm',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color:  kScaffoldColor,
-                      ),),
+                      child: Text(
+                        'Confirm',
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: kScaffoldColor,
+                            ),
+                      ),
                     ),
-                    onPressed: (){
-                      
-                    },
+                    onPressed: () {},
                   ),
                 ),
               )
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
 
 class SelectTime extends StatefulWidget {
   const SelectTime({Key? key}) : super(key: key);
@@ -239,14 +247,13 @@ class _SelectTimeState extends State<SelectTime> {
   }
 }
 
-
-
 class IntervalSelection extends StatefulWidget {
   const IntervalSelection({Key? key}) : super(key: key);
 
   @override
   State<IntervalSelection> createState() => _IntervalSelectionState();
 }
+
 class _IntervalSelectionState extends State<IntervalSelection> {
   final _intervals = [6, 8, 12, 24];
   var _selected = 0;
@@ -258,9 +265,8 @@ class _IntervalSelectionState extends State<IntervalSelection> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Remind me every',
-            style: Theme.of(context).textTheme.bodyMedium),
+          Text('Remind me every',
+              style: Theme.of(context).textTheme.bodyMedium),
           DropdownButton(
             iconEnabledColor: kOtherColor,
             dropdownColor: kScaffoldColor,
@@ -276,12 +282,12 @@ class _IntervalSelectionState extends State<IntervalSelection> {
             elevation: 4,
             value: _selected == 0 ? null : _selected,
             items: _intervals.map(
-                  (int value) {
+              (int value) {
                 return DropdownMenuItem<int>(
                   value: value,
                   child: Text(
                     value.toString(),
-                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           color: kSecondaryColor,
                         ),
                   ),
@@ -290,16 +296,15 @@ class _IntervalSelectionState extends State<IntervalSelection> {
             ).toList(),
             onChanged: (newVal) {
               setState(
-                    () {
+                () {
                   _selected = newVal!;
-                 newEntryBloc.updateInterval(newVal);
+                  newEntryBloc.updateInterval(newVal);
                 },
               );
             },
           ),
-          Text(
-            _selected == 1 ? " hour" : " hours",
-            style: Theme.of(context).textTheme.bodyMedium),
+          Text(_selected == 1 ? " hour" : " hours",
+              style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );
@@ -362,14 +367,10 @@ class MedicineTypeColumn extends StatelessWidget {
               child: Center(
                 child: Text(
                   name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium!
-                      .copyWith(
-                      color: isSelected ? Colors.white : kOtherColor,
-                    fontSize: 18.sp,
-                  ),
-
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                        color: isSelected ? Colors.white : kOtherColor,
+                        fontSize: 18.sp,
+                      ),
                 ),
               ),
             ),
@@ -392,12 +393,13 @@ class PanelTitle extends StatelessWidget {
       child: Text.rich(
         TextSpan(
           children: <TextSpan>[
-            TextSpan(text: title, style: Theme.of(context).textTheme.labelMedium),
+            TextSpan(
+                text: title, style: Theme.of(context).textTheme.labelMedium),
             TextSpan(
               text: isRequired ? " *" : "",
               style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                color: kPrimaryColor,
-              ),
+                    color: kPrimaryColor,
+                  ),
             ),
           ],
         ),
