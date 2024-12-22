@@ -40,6 +40,11 @@ dependencies:
   rxdart: ^0.28.0
   flutter_svg: ^2.0.15
   provider: ^6.1.2
+  shared_preferences: ^2.3.4
+  flutter_local_notifications: ^18.0.1
+  flare_flutter: ^3.0.2
+  timezone: ^0.9.1
+
 
 dev_dependencies:
   flutter_test:

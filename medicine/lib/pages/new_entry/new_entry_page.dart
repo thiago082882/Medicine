@@ -1,46 +1,43 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medicine/common/convert_time.dart';
 import 'package:medicine/constants.dart';
+import 'package:medicine/global_bloc.dart';
+import 'package:medicine/models/errors.dart';
+import 'package:medicine/models/medicine.dart';
+import 'package:medicine/pages/home_page.dart';
+import 'package:medicine/pages/success_screen/success_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../models/medicine_type.dart';
 import 'new_entry_bloc.dart';
 
-class NewEntryPage extends StatelessWidget {
+class NewEntryPage extends StatefulWidget {
   const NewEntryPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Provider<NewEntryBloc>(
-      create: (_) => NewEntryBloc(),
-      dispose: (_, bloc) => bloc.dispose(),
-      child: const _NewEntryPageBody(),
-    );
-  }
+  State<NewEntryPage> createState() => _NewEntryPageState();
 }
 
-class _NewEntryPageBody extends StatefulWidget {
-  const _NewEntryPageBody({super.key});
-
-  @override
-  State<_NewEntryPageBody> createState() => __NewEntryPageBodyState();
-}
-
-class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
+class _NewEntryPageState extends State<NewEntryPage> {
   late TextEditingController nameController;
   late TextEditingController dosageController;
-
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   late NewEntryBloc _newEntryBloc;
   late GlobalKey<ScaffoldState> _scaffoldKey;
 
+
   @override
   void dispose() {
+    super.dispose();
     nameController.dispose();
     dosageController.dispose();
     _newEntryBloc.dispose();
-    super.dispose();
   }
 
   @override
@@ -48,12 +45,18 @@ class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
     super.initState();
     nameController = TextEditingController();
     dosageController = TextEditingController();
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     _newEntryBloc = NewEntryBloc();
     _scaffoldKey = GlobalKey<ScaffoldState>();
+    initializeNotifications();
+    initializeErrorListen();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
+    final GlobalBloc globalBloc = Provider.of<GlobalBloc>(context);
     return Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomInset: false,
@@ -78,7 +81,8 @@ class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                 ),
-                style: Theme.of(context)
+                style: Theme
+                    .of(context)
                     .textTheme
                     .titleMedium!
                     .copyWith(color: kOtherColor),
@@ -95,7 +99,8 @@ class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                 ),
-                style: Theme.of(context)
+                style: Theme
+                    .of(context)
                     .textTheme
                     .titleMedium!
                     .copyWith(color: kOtherColor),
@@ -103,50 +108,50 @@ class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
               SizedBox(
                 height: 2.h,
               ),
-             const PanelTitle(title: 'Medicine Type', isRequired: false),
-                Padding(
-                  padding: EdgeInsets.only(top: 1.h),
-                  child: StreamBuilder<MedicineType>(
-                    //new entry block
-                    stream: _newEntryBloc.selectedMedicineType,
-                    builder: (context, snapshot) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          //not yet clickable?
-                          MedicineTypeColumn(
-                              medicineType: MedicineType.Bottle,
-                              name: 'Bottle',
-                              iconValue: 'assets/icons/bottle.svg',
-                              isSelected: snapshot.data == MedicineType.Bottle
-                                  ? true
-                                  : false),
-                          MedicineTypeColumn(
-                              medicineType: MedicineType.Pill,
-                              name: 'Pill',
-                              iconValue: 'assets/icons/pill.svg',
-                              isSelected: snapshot.data == MedicineType.Pill
-                                  ? true
-                                  : false),
-                          MedicineTypeColumn(
-                              medicineType: MedicineType.Syringe,
-                              name: 'Syringe',
-                              iconValue: 'assets/icons/syringe.svg',
-                              isSelected: snapshot.data == MedicineType.Syringe
-                                  ? true
-                                  : false),
-                          MedicineTypeColumn(
-                              medicineType: MedicineType.Tablet,
-                              name: 'Tablet',
-                              iconValue: 'assets/icons/tablet.svg',
-                              isSelected: snapshot.data == MedicineType.Tablet
-                                  ? true
-                                  : false),
-                        ],
-                      );
-                    },
-                  ),
+              const PanelTitle(title: 'Medicine Type', isRequired: false),
+              Padding(
+                padding: EdgeInsets.only(top: 1.h),
+                child: StreamBuilder<MedicineType>(
+                  //new entry block
+                  stream: _newEntryBloc.selectedMedicineType,
+                  builder: (context, snapshot) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        //not yet clickable?
+                        MedicineTypeColumn(
+                            medicineType: MedicineType.Bottle,
+                            name: 'Bottle',
+                            iconValue: 'assets/icons/bottle.svg',
+                            isSelected: snapshot.data == MedicineType.Bottle
+                                ? true
+                                : false),
+                        MedicineTypeColumn(
+                            medicineType: MedicineType.Pill,
+                            name: 'Pill',
+                            iconValue: 'assets/icons/pill.svg',
+                            isSelected: snapshot.data == MedicineType.Pill
+                                ? true
+                                : false),
+                        MedicineTypeColumn(
+                            medicineType: MedicineType.Syringe,
+                            name: 'Syringe',
+                            iconValue: 'assets/icons/syringe.svg',
+                            isSelected: snapshot.data == MedicineType.Syringe
+                                ? true
+                                : false),
+                        MedicineTypeColumn(
+                            medicineType: MedicineType.Tablet,
+                            name: 'Tablet',
+                            iconValue: 'assets/icons/tablet.svg',
+                            isSelected: snapshot.data == MedicineType.Tablet
+                                ? true
+                                : false),
+                      ],
+                    );
+                  },
                 ),
+              ),
               const PanelTitle(title: 'Interval Selection', isRequired: true),
               const IntervalSelection(),
               const PanelTitle(title: 'Starting Time', isRequired: true),
@@ -170,21 +175,213 @@ class __NewEntryPageBodyState extends State<_NewEntryPageBody> {
                     child: Center(
                       child: Text(
                         'Confirm',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: kScaffoldColor,
-                            ),
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(
+                          color: kScaffoldColor,
+                        ),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      //add medicine
+                      //some validations
+                      //go to success screen
+                      String? medicineName;
+                      int? dosage;
+
+                      //medicineName
+                      if (nameController.text == "") {
+                        _newEntryBloc.submitError(EntryError.nameNull);
+                        return;
+                      }
+                      if (nameController.text != "") {
+                        medicineName = nameController.text;
+                      }
+                      //dosage
+                      if (dosageController.text == "") {
+                        dosage = 0;
+                      }
+                      if (dosageController.text != "") {
+                        dosage = int.parse(dosageController.text);
+                      }
+                      for (var medicine in globalBloc.medicineList$!.value) {
+                        if (medicineName == medicine.medicineName) {
+                          _newEntryBloc.submitError(EntryError.nameDuplicate);
+                          return;
+                        }
+                      }
+                      if (_newEntryBloc.selectIntervals!.value == 0) {
+                        _newEntryBloc.submitError(EntryError.interval);
+                        return;
+                      }
+                      if (_newEntryBloc.selectedTimeOfDay$!.value == 'None') {
+                        _newEntryBloc.submitError(EntryError.startTime);
+                        return;
+                      }
+
+                      String medicineType = _newEntryBloc
+                          .selectedMedicineType!.value
+                          .toString()
+                          .substring(13);
+
+                      int interval = _newEntryBloc.selectIntervals!.value;
+                      String startTime =
+                          _newEntryBloc.selectedTimeOfDay$!.value;
+
+                      List<int> intIDs =
+                      makeIDs(24 / _newEntryBloc.selectIntervals!.value);
+                      List<String> notificationIDs =
+                      intIDs.map((i) => i.toString()).toList();
+
+                      Medicine newEntryMedicine = Medicine(
+                          notificationIDs: notificationIDs,
+                          medicineName: medicineName,
+                          dosage: dosage,
+                          medicineType: medicineType,
+                          interval: interval,
+                          startTime: startTime);
+
+                      //update medicine list via global bloc
+                      globalBloc.updateMedicineList(newEntryMedicine);
+
+                      //schedule notification
+                      scheduleNotification(newEntryMedicine);
+
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SuccessScreen()));
+                    },
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  void initializeErrorListen() {
+    _newEntryBloc.errorState$!.listen((EntryError error) {
+      switch (error) {
+        case EntryError.nameNull:
+          displayError("Please enter the medicine's name");
+          break;
+
+        case EntryError.nameDuplicate:
+          displayError("Medicine name already exists");
+          break;
+        case EntryError.dosage:
+          displayError("Please enter the dosage required");
+          break;
+        case EntryError.interval:
+          displayError("Please select the reminder's interval");
+          break;
+        case EntryError.startTime:
+          displayError("Please select the reminder's starting time");
+          break;
+        default:
+      }
+    });
+  }
+
+  void displayError(String error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: kOtherColor,
+        content: Text(error),
+        duration: const Duration(milliseconds: 2000),
+      ),
+    );
+  }
+
+  List<int> makeIDs(double n) {
+    var rng = Random();
+    List<int> ids = [];
+    for (int i = 0; i < n; i++) {
+      ids.add(rng.nextInt(1000000000));
+    }
+    return ids;
+  }
+
+  initializeNotifications() async {
+    var initializationSettingsAndroid =
+    const AndroidInitializationSettings('@mipmap/launcher_icon');
+
+    var initializationSettingsIOS = const DarwinInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future onSelectNotification(String? payload) async {
+    if (payload != null) {
+      debugPrint('notification payload: $payload');
+    }
+    await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const HomePage()));
+  }
+
+  Future<void> scheduleNotification(Medicine medicine) async {
+    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+      'repeatDailyAtTime channel id',
+      'repeatDailyAtTime channel name',
+      importance: Importance.max,
+      ledColor: kOtherColor,
+      ledOffMs: 1000,
+      ledOnMs: 1000,
+      enableLights: true,
+    );
+
+    var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
+
+    var platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    var hour = int.parse(medicine.startTime![0] + medicine.startTime![1]);
+    var minute = int.parse(medicine.startTime![2] + medicine.startTime![3]);
+    var ogValue = hour;
+
+    for (int i = 0; i < (24 / medicine.interval!).floor(); i++) {
+      if (hour + (medicine.interval! * i) > 23) {
+        hour = hour + (medicine.interval! * i) - 24;
+      } else {
+        hour = hour + (medicine.interval! * i);
+      }
+
+      final scheduledDate = tz.TZDateTime.now(tz.local)
+          .add(Duration(hours: hour - DateTime.now().hour, minutes: minute - DateTime.now().minute));
+
+      flutterLocalNotificationsPlugin.zonedSchedule(
+        0,
+        'Title',
+        'Body',
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'your_channel_id',
+            'your_channel_name',
+            channelDescription: 'your_channel_description',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.inexact,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime, // Add this line
+      );
+
+
+
+      hour = ogValue;
+    }
+  }
+
 }
 
 class SelectTime extends StatefulWidget {
