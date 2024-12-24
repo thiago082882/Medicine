@@ -76,6 +76,21 @@ class _MyAppState extends State<MyApp> {
               fontSize: 18.sp,
               fontWeight: FontWeight.w500,
               color: kTextColor
+            ),
+              titleLarge: TextStyle(
+              fontSize: 19.sp,
+              fontWeight: FontWeight.w400,
+              color: kTextColor
+            ),
+              headlineSmall: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w400,
+              color: kSecondaryColor,
+            ),
+              titleMedium: TextStyle(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w400,
+              color: kSecondaryColor,
             )
           ),
           inputDecorationTheme: const InputDecorationTheme(
@@ -112,6 +127,7 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
         ),
+        debugShowCheckedModeBanner: false,
         home: const HomePage(),
       );
     }

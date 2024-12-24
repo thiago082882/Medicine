@@ -170,7 +170,7 @@ class MedicineCard extends StatelessWidget {
         tag: medicine.medicineName! + medicine.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/pill.svg',
-          color: kOtherColor,
+           colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
           height: 7.h,
         ),
       );
@@ -179,7 +179,7 @@ class MedicineCard extends StatelessWidget {
         tag: medicine.medicineName! + medicine.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/syringe.svg',
-          color: kOtherColor,
+           colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
           height: 7.h,
         ),
       );
@@ -188,7 +188,7 @@ class MedicineCard extends StatelessWidget {
         tag: medicine.medicineName! + medicine.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/tablet.svg',
-          color: kOtherColor,
+           colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
           height: 7.h,
         ),
       );
@@ -253,7 +253,7 @@ class MedicineCard extends StatelessWidget {
                 medicine.medicineName!,
                 overflow: TextOverflow.fade,
                 textAlign: TextAlign.start,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(context).textTheme.titleMedium
               ),
             ),
             SizedBox(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medicine/constants.dart';
+import 'package:medicine/global_bloc.dart';
 import 'package:medicine/models/medicine.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
@@ -16,7 +17,7 @@ class MedicineDetails extends StatefulWidget {
 class _MedicineDetailsState extends State<MedicineDetails> {
   @override
   Widget build(BuildContext context) {
-    //final GlobalBloc _globalBloc = Provider.of<GlobalBloc>(context);
+    final GlobalBloc _globalBloc = Provider.of<GlobalBloc>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Details'),
@@ -39,7 +40,7 @@ class _MedicineDetailsState extends State<MedicineDetails> {
                 onPressed: () {
                   //open alert dialog box,+global bloc, later
                   //cool its working
-                  openAlertBox(context);
+                  openAlertBox(context,_globalBloc);
                 },
                 child: Text(
                   'Delete',
@@ -60,7 +61,7 @@ class _MedicineDetailsState extends State<MedicineDetails> {
   }
   //lets delete a medicine from memory
 
-  openAlertBox(BuildContext context) {
+  openAlertBox(BuildContext context,GlobalBloc _globalBloc) {
     return showDialog(
       context: context,
       builder: (context) {
@@ -85,13 +86,13 @@ class _MedicineDetailsState extends State<MedicineDetails> {
               },
               child: Text(
                 'Cancel',
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
             TextButton(
               onPressed: () {
                 //global block to delete medicine,later
-              //  _globalBloc.removeMedicine(widget.medicine);
+                _globalBloc.removeMedicine(widget.medicine);
                 Navigator.popUntil(context, ModalRoute.withName('/'));
               },
               child: Text(
@@ -115,19 +116,20 @@ class MainSection extends StatelessWidget {
   Hero makeIcon(double size) {
     if (medicine!.medicineType == 'Bottle') {
       return Hero(
-        tag: medicine!.medicineName! + medicine!.medicineType!,
-        child: SvgPicture.asset(
-          'assets/icons/bottle.svg',
-          color: kOtherColor,
-          height: 7.h,
-        ),
-      );
+  tag: medicine!.medicineName! + medicine!.medicineType!,
+  child: SvgPicture.asset(
+    'assets/icons/bottle.svg',
+    colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn), 
+    height: 7.h,
+  ),
+);
+
     } else if (medicine!.medicineType == 'Pill') {
       return Hero(
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/pill.svg',
-          color: kOtherColor,
+         colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
           height: 7.h,
         ),
       );
@@ -136,7 +138,7 @@ class MainSection extends StatelessWidget {
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/syringe.svg',
-          color: kOtherColor,
+         colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
           height: 7.h,
         ),
       );
@@ -145,7 +147,7 @@ class MainSection extends StatelessWidget {
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/tablet.svg',
-          color: kOtherColor,
+          colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
           height: 7.h,
         ),
       );
@@ -212,14 +214,15 @@ class MainInfoTab extends StatelessWidget {
           children: [
             Text(
               fieldTitle,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.titleLarge,
+              
             ),
             SizedBox(
               height: 0.3.h,
             ),
             Text(
               fieldInfo,
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ],
         ),
@@ -275,14 +278,14 @@ class ExtendedInfoTab extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 1.h),
             child: Text(
               fieldTitle,
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     color: kTextColor,
                   ),
             ),
           ),
           Text(
             fieldInfo,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   color: kSecondaryColor,
                 ),
           ),

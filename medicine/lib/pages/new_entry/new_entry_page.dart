@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medicine/common/convert_time.dart';
 import 'package:medicine/constants.dart';
+import 'package:medicine/custom_time_picker_dialog.dart';
 import 'package:medicine/global_bloc.dart';
 import 'package:medicine/models/errors.dart';
 import 'package:medicine/models/medicine.dart';
@@ -13,7 +14,7 @@ import 'package:medicine/pages/success_screen/success_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timezone/timezone.dart' as tz;
-
+import 'package:flutter/services.dart';
 import '../../models/medicine_type.dart';
 import 'new_entry_bloc.dart';
 
@@ -30,7 +31,6 @@ class _NewEntryPageState extends State<NewEntryPage> {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   late NewEntryBloc _newEntryBloc;
   late GlobalKey<ScaffoldState> _scaffoldKey;
-
 
   @override
   void dispose() {
@@ -52,212 +52,209 @@ class _NewEntryPageState extends State<NewEntryPage> {
     initializeErrorListen();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final GlobalBloc globalBloc = Provider.of<GlobalBloc>(context);
     return Scaffold(
       key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text("Add New"),
       ),
       body: Provider<NewEntryBloc>.value(
         value: _newEntryBloc,
-        child: Padding(
-          padding: EdgeInsets.all(2.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const PanelTitle(
-                title: "Medicine Name",
-                isRequired: true,
-              ),
-              TextFormField(
-                maxLength: 12,
-                controller: nameController,
-                textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(2.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+  const PanelTitle(
+    title: "Medicine Name",
+    isRequired: true,
+  ),
+  TextFormField(
+    maxLength: 12,
+    controller: nameController,
+    textCapitalization: TextCapitalization.words,
+    decoration: const InputDecoration(
+      border: UnderlineInputBorder(),
+    ),
+    style: Theme.of(context)
+        .textTheme
+        .bodyMedium!
+        .copyWith(color: kOtherColor),
+    cursorColor: kOtherColor, // Definindo a cor do cursor como azul
+  ),
+  const PanelTitle(
+    title: "Dosage in mg",
+    isRequired: false,
+  ),
+  TextFormField(
+    maxLength: 12,
+    controller: dosageController,
+    textCapitalization: TextCapitalization.words,
+    keyboardType: TextInputType.number,
+    decoration: const InputDecoration(
+      border: UnderlineInputBorder(),
+    ),
+    style: Theme.of(context)
+        .textTheme
+        .bodyMedium!
+        .copyWith(color: kOtherColor),
+    cursorColor: kOtherColor, // Definindo a cor do cursor como azul
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly, // Permite apenas números
+    ],
+  ),
+                SizedBox(
+                  height: 2.h,
                 ),
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: kOtherColor),
-              ),
-              const PanelTitle(
-                title: "Dosage in mg",
-                isRequired: false,
-              ),
-              TextFormField(
-                maxLength: 12,
-                controller: dosageController,
-                textCapitalization: TextCapitalization.words,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                ),
-                style: Theme
-                    .of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: kOtherColor),
-              ),
-              SizedBox(
-                height: 2.h,
-              ),
-              const PanelTitle(title: 'Medicine Type', isRequired: false),
-              Padding(
-                padding: EdgeInsets.only(top: 1.h),
-                child: StreamBuilder<MedicineType>(
-                  //new entry block
-                  stream: _newEntryBloc.selectedMedicineType,
-                  builder: (context, snapshot) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        //not yet clickable?
-                        MedicineTypeColumn(
-                            medicineType: MedicineType.Bottle,
-                            name: 'Bottle',
-                            iconValue: 'assets/icons/bottle.svg',
-                            isSelected: snapshot.data == MedicineType.Bottle
-                                ? true
-                                : false),
-                        MedicineTypeColumn(
-                            medicineType: MedicineType.Pill,
-                            name: 'Pill',
-                            iconValue: 'assets/icons/pill.svg',
-                            isSelected: snapshot.data == MedicineType.Pill
-                                ? true
-                                : false),
-                        MedicineTypeColumn(
-                            medicineType: MedicineType.Syringe,
-                            name: 'Syringe',
-                            iconValue: 'assets/icons/syringe.svg',
-                            isSelected: snapshot.data == MedicineType.Syringe
-                                ? true
-                                : false),
-                        MedicineTypeColumn(
-                            medicineType: MedicineType.Tablet,
-                            name: 'Tablet',
-                            iconValue: 'assets/icons/tablet.svg',
-                            isSelected: snapshot.data == MedicineType.Tablet
-                                ? true
-                                : false),
-                      ],
-                    );
-                  },
-                ),
-              ),
-              const PanelTitle(title: 'Interval Selection', isRequired: true),
-              const IntervalSelection(),
-              const PanelTitle(title: 'Starting Time', isRequired: true),
-              const SelectTime(),
-              SizedBox(
-                height: 2.h,
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                  left: 8.w,
-                  right: 8.w,
-                ),
-                child: SizedBox(
-                  width: 80.w,
-                  height: 6.h,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: kPrimaryColor,
-                      shape: const StadiumBorder(),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Confirm',
-                        style: Theme
-                            .of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(
-                          color: kScaffoldColor,
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      //add medicine
-                      //some validations
-                      //go to success screen
-                      String? medicineName;
-                      int? dosage;
-
-                      //medicineName
-                      if (nameController.text == "") {
-                        _newEntryBloc.submitError(EntryError.nameNull);
-                        return;
-                      }
-                      if (nameController.text != "") {
-                        medicineName = nameController.text;
-                      }
-                      //dosage
-                      if (dosageController.text == "") {
-                        dosage = 0;
-                      }
-                      if (dosageController.text != "") {
-                        dosage = int.parse(dosageController.text);
-                      }
-                      for (var medicine in globalBloc.medicineList$!.value) {
-                        if (medicineName == medicine.medicineName) {
-                          _newEntryBloc.submitError(EntryError.nameDuplicate);
-                          return;
-                        }
-                      }
-                      if (_newEntryBloc.selectIntervals!.value == 0) {
-                        _newEntryBloc.submitError(EntryError.interval);
-                        return;
-                      }
-                      if (_newEntryBloc.selectedTimeOfDay$!.value == 'None') {
-                        _newEntryBloc.submitError(EntryError.startTime);
-                        return;
-                      }
-
-                      String medicineType = _newEntryBloc
-                          .selectedMedicineType!.value
-                          .toString()
-                          .substring(13);
-
-                      int interval = _newEntryBloc.selectIntervals!.value;
-                      String startTime =
-                          _newEntryBloc.selectedTimeOfDay$!.value;
-
-                      List<int> intIDs =
-                      makeIDs(24 / _newEntryBloc.selectIntervals!.value);
-                      List<String> notificationIDs =
-                      intIDs.map((i) => i.toString()).toList();
-
-                      Medicine newEntryMedicine = Medicine(
-                          notificationIDs: notificationIDs,
-                          medicineName: medicineName,
-                          dosage: dosage,
-                          medicineType: medicineType,
-                          interval: interval,
-                          startTime: startTime);
-
-                      //update medicine list via global bloc
-                      globalBloc.updateMedicineList(newEntryMedicine);
-
-                      //schedule notification
-                      scheduleNotification(newEntryMedicine);
-
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SuccessScreen()));
+                const PanelTitle(title: 'Medicine Type', isRequired: false),
+                Padding(
+                  padding: EdgeInsets.only(top: 1.h),
+                  child: StreamBuilder<MedicineType>(
+                    //new entry block
+                    stream: _newEntryBloc.selectedMedicineType,
+                    builder: (context, snapshot) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          //not yet clickable?
+                          MedicineTypeColumn(
+                              medicineType: MedicineType.Bottle,
+                              name: 'Bottle',
+                              iconValue: 'assets/icons/bottle.svg',
+                              isSelected: snapshot.data == MedicineType.Bottle
+                                  ? true
+                                  : false),
+                          MedicineTypeColumn(
+                              medicineType: MedicineType.Pill,
+                              name: 'Pill',
+                              iconValue: 'assets/icons/pill.svg',
+                              isSelected: snapshot.data == MedicineType.Pill
+                                  ? true
+                                  : false),
+                          MedicineTypeColumn(
+                              medicineType: MedicineType.Syringe,
+                              name: 'Syringe',
+                              iconValue: 'assets/icons/syringe.svg',
+                              isSelected: snapshot.data == MedicineType.Syringe
+                                  ? true
+                                  : false),
+                          MedicineTypeColumn(
+                              medicineType: MedicineType.Tablet,
+                              name: 'Tablet',
+                              iconValue: 'assets/icons/tablet.svg',
+                              isSelected: snapshot.data == MedicineType.Tablet
+                                  ? true
+                                  : false),
+                        ],
+                      );
                     },
                   ),
                 ),
-              ),
-            ],
+                const PanelTitle(title: 'Interval Selection', isRequired: true),
+                const IntervalSelection(),
+                const PanelTitle(title: 'Starting Time', isRequired: true),
+                const SelectTime(),
+                SizedBox(
+                  height: 2.h,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: 8.w,
+                    right: 8.w,
+                  ),
+                  child: SizedBox(
+                    width: 80.w,
+                    height: 6.h,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: kPrimaryColor,
+                        shape: const StadiumBorder(),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Confirm',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    color: kScaffoldColor,
+                                  ),
+                        ),
+                      ),
+                      onPressed: () {
+                        String? medicineName;
+                        int? dosage;
+
+                        if (nameController.text == "") {
+                          _newEntryBloc.submitError(EntryError.nameNull);
+                          return;
+                        }
+                        if (nameController.text != "") {
+                          medicineName = nameController.text;
+                        }
+
+                        if (dosageController.text == "") {
+                          dosage = 0;
+                        }
+                        if (dosageController.text != "") {
+                          dosage = int.parse(dosageController.text);
+                        }
+
+                        for (var medicine in globalBloc.medicineList$!.value) {
+                          if (medicineName == medicine.medicineName) {
+                            _newEntryBloc.submitError(EntryError.nameDuplicate);
+                            return;
+                          }
+                        }
+
+                        if (_newEntryBloc.selectIntervals!.value == 0) {
+                          _newEntryBloc.submitError(EntryError.interval);
+                          return;
+                        }
+
+                        if (_newEntryBloc.selectedTimeOfDay$!.value == 'None') {
+                          _newEntryBloc.submitError(EntryError.startTime);
+                          return;
+                        }
+
+                        String medicineType = _newEntryBloc
+                            .selectedMedicineType!.value
+                            .toString()
+                            .substring(13);
+
+                        int interval = _newEntryBloc.selectIntervals!.value;
+                        String startTime =
+                            _newEntryBloc.selectedTimeOfDay$!.value;
+
+                        List<int> intIDs =
+                            makeIDs(24 / _newEntryBloc.selectIntervals!.value);
+                        List<String> notificationIDs =
+                            intIDs.map((i) => i.toString()).toList();
+
+                        Medicine newEntryMedicine = Medicine(
+                            notificationIDs: notificationIDs,
+                            medicineName: medicineName,
+                            dosage: dosage,
+                            medicineType: medicineType,
+                            interval: interval,
+                            startTime: startTime);
+
+                        globalBloc.updateMedicineList(newEntryMedicine);
+
+                        scheduleNotification(newEntryMedicine);
+
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SuccessScreen()));
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -270,7 +267,6 @@ class _NewEntryPageState extends State<NewEntryPage> {
         case EntryError.nameNull:
           displayError("Please enter the medicine's name");
           break;
-
         case EntryError.nameDuplicate:
           displayError("Medicine name already exists");
           break;
@@ -309,7 +305,7 @@ class _NewEntryPageState extends State<NewEntryPage> {
 
   initializeNotifications() async {
     var initializationSettingsAndroid =
-    const AndroidInitializationSettings('@mipmap/launcher_icon');
+        const AndroidInitializationSettings('@mipmap/ic_launcher');
 
     var initializationSettingsIOS = const DarwinInitializationSettings();
     var initializationSettings = InitializationSettings(
@@ -326,61 +322,73 @@ class _NewEntryPageState extends State<NewEntryPage> {
         context, MaterialPageRoute(builder: (context) => const HomePage()));
   }
 
-  Future<void> scheduleNotification(Medicine medicine) async {
-    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-      'repeatDailyAtTime channel id',
-      'repeatDailyAtTime channel name',
-      importance: Importance.max,
-      ledColor: kOtherColor,
-      ledOffMs: 1000,
-      ledOnMs: 1000,
-      enableLights: true,
-    );
+Future<void> scheduleNotification(Medicine medicine) async {
+  // Configurações específicas para Android
+  var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+    'repeatDailyAtTime channel id',
+    'repeatDailyAtTime channel name',
+    importance: Importance.max,
+    ledColor: kOtherColor,
+    ledOffMs: 1000,
+    ledOnMs: 1000,
+    enableLights: true,
+  );
 
-    var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
+  // Configurações específicas para iOS
+  var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
 
-    var platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
+  // Configurações gerais
+  var platformChannelSpecifics = NotificationDetails(
+    android: androidPlatformChannelSpecifics,
+    iOS: iOSPlatformChannelSpecifics,
+  );
 
-    var hour = int.parse(medicine.startTime![0] + medicine.startTime![1]);
-    var minute = int.parse(medicine.startTime![2] + medicine.startTime![3]);
-    var ogValue = hour;
+  // Validação e conversão segura do horário inicial
+  if (medicine.startTime == null || medicine.startTime!.length < 4) {
+    print("Erro: startTime está vazio ou no formato inválido.");
+    return;
+  }
 
+  try {
+    // Extraindo hora e minuto do formato "HHmm"
+    int hour = int.parse(medicine.startTime!.substring(0, 2));
+    int minute = int.parse(medicine.startTime!.substring(2, 4));
+    int ogValue = hour;
+
+    // Agendamento para os horários baseados no intervalo
     for (int i = 0; i < (24 / medicine.interval!).floor(); i++) {
+      // Calcula a hora correta no ciclo
       if (hour + (medicine.interval! * i) > 23) {
         hour = hour + (medicine.interval! * i) - 24;
       } else {
         hour = hour + (medicine.interval! * i);
       }
 
-      final scheduledDate = tz.TZDateTime.now(tz.local)
-          .add(Duration(hours: hour - DateTime.now().hour, minutes: minute - DateTime.now().minute));
+      // Cria a data agendada baseada no fuso horário local
+      final scheduledDate = tz.TZDateTime.now(tz.local).add(Duration(
+        hours: hour - DateTime.now().hour,
+        minutes: minute - DateTime.now().minute,
+      ));
 
+      // Agendamento da notificação
       flutterLocalNotificationsPlugin.zonedSchedule(
-        0,
-        'Title',
-        'Body',
+        i, // ID único para cada notificação
+        'Lembrete de Medicamento',
+        '${medicine.medicineName} está programado para este horário.',
         scheduledDate,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'your_channel_id',
-            'your_channel_name',
-            channelDescription: 'your_channel_description',
-            importance: Importance.high,
-            priority: Priority.high,
-          ),
-        ),
+        platformChannelSpecifics,
         androidScheduleMode: AndroidScheduleMode.inexact,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime, // Add this line
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
       );
 
-
-
+      // Restaura o valor original da hora
       hour = ogValue;
     }
+  } catch (e) {
+    print("Erro ao agendar notificações: ${e.toString()}");
   }
+}
 
 }
 
@@ -390,7 +398,7 @@ class SelectTime extends StatefulWidget {
   @override
   State<SelectTime> createState() => _SelectTimeState();
 }
-
+/*
 class _SelectTimeState extends State<SelectTime> {
   TimeOfDay _time = const TimeOfDay(hour: 0, minute: 00);
   bool _clicked = false;
@@ -432,6 +440,53 @@ class _SelectTimeState extends State<SelectTime> {
               _clicked == false
                   ? "Select Time"
                   : "${convertTime(_time.hour.toString())}:${convertTime(_time.minute.toString())}",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium!
+                  .copyWith(color: kScaffoldColor),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+*/
+
+class _SelectTimeState extends State<SelectTime> {
+  TimeOfDay? selectedTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 8.h,
+      child: Padding(
+        padding: EdgeInsets.only(top: 2.h),
+        child: TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: kPrimaryColor,
+            shape: const StadiumBorder(),
+          ),
+          onPressed: () async {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return CustomTimePickerDialog(
+                  onTimeSelected: (time) {
+                    setState(() {
+                      selectedTime = time;
+                    });
+                  },
+                );
+              },
+            );
+          },
+          child: Center(
+            child: Text(
+              selectedTime == null
+                  ? "Selecione o Horário"
+                  : "${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}",
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium!
