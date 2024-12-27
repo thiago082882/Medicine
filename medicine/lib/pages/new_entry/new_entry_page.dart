@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medicine/common/convert_time.dart';
-import 'package:medicine/constants.dart';
+import 'package:medicine/utils/constants.dart';
 import 'package:medicine/custom_time_picker_dialog.dart';
-import 'package:medicine/global_bloc.dart';
+import 'package:medicine/utils/global_bloc.dart';
 import 'package:medicine/models/errors.dart';
 import 'package:medicine/models/medicine.dart';
 import 'package:medicine/pages/home_page.dart';
@@ -16,7 +16,9 @@ import 'package:sizer/sizer.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
 import '../../models/medicine_type.dart';
+import '../../utils/select_time.dart';
 import 'new_entry_bloc.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 class NewEntryPage extends StatefulWidget {
   const NewEntryPage({super.key});
@@ -43,6 +45,7 @@ class _NewEntryPageState extends State<NewEntryPage> {
   @override
   void initState() {
     super.initState();
+    tz.initializeTimeZones();
     nameController = TextEditingController();
     dosageController = TextEditingController();
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -69,44 +72,48 @@ class _NewEntryPageState extends State<NewEntryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-  const PanelTitle(
-    title: "Medicine Name",
-    isRequired: true,
-  ),
-  TextFormField(
-    maxLength: 12,
-    controller: nameController,
-    textCapitalization: TextCapitalization.words,
-    decoration: const InputDecoration(
-      border: UnderlineInputBorder(),
-    ),
-    style: Theme.of(context)
-        .textTheme
-        .bodyMedium!
-        .copyWith(color: kOtherColor),
-    cursorColor: kOtherColor, // Definindo a cor do cursor como azul
-  ),
-  const PanelTitle(
-    title: "Dosage in mg",
-    isRequired: false,
-  ),
-  TextFormField(
-    maxLength: 12,
-    controller: dosageController,
-    textCapitalization: TextCapitalization.words,
-    keyboardType: TextInputType.number,
-    decoration: const InputDecoration(
-      border: UnderlineInputBorder(),
-    ),
-    style: Theme.of(context)
-        .textTheme
-        .bodyMedium!
-        .copyWith(color: kOtherColor),
-    cursorColor: kOtherColor, // Definindo a cor do cursor como azul
-    inputFormatters: [
-      FilteringTextInputFormatter.digitsOnly, // Permite apenas números
-    ],
-  ),
+                const PanelTitle(
+                  title: "Medicine Name",
+                  isRequired: true,
+                ),
+                TextFormField(
+                  maxLength: 12,
+                  controller: nameController,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                  ),
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: kOtherColor),
+                  cursorColor: kOtherColor, // Definindo a cor do cursor como azul
+                ),
+                const PanelTitle(
+                  title: "Dosage in mg",
+                  isRequired: false,
+                ),
+                TextFormField(
+                  maxLength: 12,
+                  controller: dosageController,
+                  textCapitalization: TextCapitalization.words,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                  ),
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: kOtherColor),
+                  cursorColor: kOtherColor,
+                  // Definindo a cor do cursor como azul
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    // Permite apenas números
+                  ],
+                ),
                 SizedBox(
                   height: 2.h,
                 ),
@@ -178,9 +185,13 @@ class _NewEntryPageState extends State<NewEntryPage> {
                         child: Text(
                           'Confirm',
                           style:
-                              Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                    color: kScaffoldColor,
-                                  ),
+                          Theme
+                              .of(context)
+                              .textTheme
+                              .bodyMedium!
+                              .copyWith(
+                            color: kScaffoldColor,
+                          ),
                         ),
                       ),
                       onPressed: () {
@@ -229,9 +240,9 @@ class _NewEntryPageState extends State<NewEntryPage> {
                             _newEntryBloc.selectedTimeOfDay$!.value;
 
                         List<int> intIDs =
-                            makeIDs(24 / _newEntryBloc.selectIntervals!.value);
+                        makeIDs(24 / _newEntryBloc.selectIntervals!.value);
                         List<String> notificationIDs =
-                            intIDs.map((i) => i.toString()).toList();
+                        intIDs.map((i) => i.toString()).toList();
 
                         Medicine newEntryMedicine = Medicine(
                             notificationIDs: notificationIDs,
@@ -305,7 +316,7 @@ class _NewEntryPageState extends State<NewEntryPage> {
 
   initializeNotifications() async {
     var initializationSettingsAndroid =
-        const AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings('@drawable/remedio');
 
     var initializationSettingsIOS = const DarwinInitializationSettings();
     var initializationSettings = InitializationSettings(
@@ -322,138 +333,229 @@ class _NewEntryPageState extends State<NewEntryPage> {
         context, MaterialPageRoute(builder: (context) => const HomePage()));
   }
 
-Future<void> scheduleNotification(Medicine medicine) async {
-  // Configurações específicas para Android
-  var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-    'repeatDailyAtTime channel id',
-    'repeatDailyAtTime channel name',
-    importance: Importance.max,
-    ledColor: kOtherColor,
-    ledOffMs: 1000,
-    ledOnMs: 1000,
-    enableLights: true,
-  );
-
-  // Configurações específicas para iOS
-  var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
-
-  // Configurações gerais
-  var platformChannelSpecifics = NotificationDetails(
-    android: androidPlatformChannelSpecifics,
-    iOS: iOSPlatformChannelSpecifics,
-  );
-
-  // Validação e conversão segura do horário inicial
-  if (medicine.startTime == null || medicine.startTime!.length < 4) {
-    print("Erro: startTime está vazio ou no formato inválido.");
-    return;
-  }
-
-  try {
-    // Extraindo hora e minuto do formato "HHmm"
-    int hour = int.parse(medicine.startTime!.substring(0, 2));
-    int minute = int.parse(medicine.startTime!.substring(2, 4));
-    int ogValue = hour;
-
-    // Agendamento para os horários baseados no intervalo
-    for (int i = 0; i < (24 / medicine.interval!).floor(); i++) {
-      // Calcula a hora correta no ciclo
-      if (hour + (medicine.interval! * i) > 23) {
-        hour = hour + (medicine.interval! * i) - 24;
-      } else {
-        hour = hour + (medicine.interval! * i);
-      }
-
-      // Cria a data agendada baseada no fuso horário local
-      final scheduledDate = tz.TZDateTime.now(tz.local).add(Duration(
-        hours: hour - DateTime.now().hour,
-        minutes: minute - DateTime.now().minute,
-      ));
-
-      // Agendamento da notificação
-      flutterLocalNotificationsPlugin.zonedSchedule(
-        i, // ID único para cada notificação
-        'Lembrete de Medicamento',
-        '${medicine.medicineName} está programado para este horário.',
-        scheduledDate,
-        platformChannelSpecifics,
-        androidScheduleMode: AndroidScheduleMode.inexact,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.wallClockTime,
-      );
-
-      // Restaura o valor original da hora
-      hour = ogValue;
-    }
-  } catch (e) {
-    print("Erro ao agendar notificações: ${e.toString()}");
-  }
-}
-
-}
-
-class SelectTime extends StatefulWidget {
-  const SelectTime({Key? key}) : super(key: key);
-
-  @override
-  State<SelectTime> createState() => _SelectTimeState();
-}
-/*
-class _SelectTimeState extends State<SelectTime> {
-  TimeOfDay _time = const TimeOfDay(hour: 0, minute: 00);
-  bool _clicked = false;
-
-  Future<TimeOfDay> _selectTime() async {
-    final NewEntryBloc newEntryBloc =
-        Provider.of<NewEntryBloc>(context, listen: false);
-
-    final TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: _time);
-
-    if (picked != null && picked != _time) {
-      setState(() {
-        _time = picked;
-        _clicked = true;
-
-        //update state via provider, we will do later
-        newEntryBloc.updateTime(convertTime(_time.hour.toString()) +
-            convertTime(_time.minute.toString()));
-      });
-    }
-    return picked!;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 8.h,
-      child: Padding(
-        padding: EdgeInsets.only(top: 2.h),
-        child: TextButton(
-          style: TextButton.styleFrom(
-              backgroundColor: kPrimaryColor, shape: const StadiumBorder()),
-          onPressed: () {
-            _selectTime();
-          },
-          child: Center(
-            child: Text(
-              _clicked == false
-                  ? "Select Time"
-                  : "${convertTime(_time.hour.toString())}:${convertTime(_time.minute.toString())}",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(color: kScaffoldColor),
-            ),
-          ),
-        ),
-      ),
+//   Future<void> scheduleNotification(Medicine medicine) async {
+//     // Configurações específicas para Android
+//     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+//       'repeatDailyAtTime channel id',
+//       'repeatDailyAtTime channel name',
+//       importance: Importance.max,
+//       ledColor: kOtherColor,
+//       ledOffMs: 1000,
+//       ledOnMs: 1000,
+//       enableLights: true,
+//     );
+//
+//     // Configurações específicas para iOS
+//     var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
+//
+//     // Configurações gerais
+//     var platformChannelSpecifics = NotificationDetails(
+//       android: androidPlatformChannelSpecifics,
+//       iOS: iOSPlatformChannelSpecifics,
+//     );
+//
+//     // Validação e conversão segura do horário inicial
+//     if (medicine.startTime == null || medicine.startTime!.length < 4) {
+//       print("Erro: startTime está vazio ou no formato inválido.");
+//       return;
+//     }
+//
+//     try {
+//       // Extraindo hora e minuto do formato "HHmm"
+//       int hour = int.tryParse(medicine.startTime!.substring(0, 2)) ?? 0;
+//       int minute = int.tryParse(medicine.startTime!.substring(2, 4)) ?? 0;
+//
+//       // Agendamento para os horários baseados no intervalo
+//       for (int i = 0; i < (24 / medicine.interval!).floor(); i++) {
+//         // Calcula a hora correta no ciclo
+//         int adjustedHour = (hour + (medicine.interval! * i)) % 24;
+//
+//         // Cria a data agendada baseada no fuso horário local
+//         DateTime now = DateTime.now();
+//         DateTime scheduledDate = DateTime(
+//           now.year,
+//           now.month,
+//           now.day,
+//           adjustedHour,
+//           minute,
+//         );
+//
+//         // Verificação se a data agendada está no futuro
+//         if (scheduledDate.isBefore(now) || scheduledDate.isAtSameMomentAs(now)) {
+//           scheduledDate = scheduledDate.add(Duration(days: 1));
+//           print("Erro: scheduledDate não está no futuro. Ajustando para o próximo ciclo.");
+//         }
+//
+//         // Ajusta para tz
+//         final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+//
+//         // Agendamento da notificação
+//         await flutterLocalNotificationsPlugin.zonedSchedule(
+//           i, // ID único para cada notificação
+//           'Lembrete de Medicamento',
+//           '${medicine.medicineName} está programado para este horário.',
+//           tzScheduledDate,
+//           platformChannelSpecifics,
+//           androidScheduleMode: AndroidScheduleMode.exact, // Garante tempo exato
+//           uiLocalNotificationDateInterpretation:
+//           UILocalNotificationDateInterpretation.wallClockTime,
+//         );
+//       }
+//     } catch (e) {
+//       print("Erro ao agendar notificações: ${e.toString()}");
+//     }
+//   }
+// }
+//   Future<void> scheduleNotification(Medicine medicine) async {
+//     // Configurações específicas para Android
+//     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+//       'repeatDailyAtTime channel id',
+//       'repeatDailyAtTime channel name',
+//       importance: Importance.max,
+//       ledColor: kOtherColor,
+//       ledOffMs: 1000,
+//       ledOnMs: 1000,
+//       enableLights: true,
+//     );
+//
+//     // Configurações específicas para iOS
+//     var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
+//
+//     // Configurações gerais
+//     var platformChannelSpecifics = NotificationDetails(
+//       android: androidPlatformChannelSpecifics,
+//       iOS: iOSPlatformChannelSpecifics,
+//     );
+//
+//     // Validação e conversão segura do horário inicial
+//     if (medicine.startTime == null || medicine.startTime!.length < 4) {
+//       print("Erro: startTime está vazio ou no formato inválido.");
+//       return;
+//     }
+//
+//     try {
+//       // Extraindo hora e minuto do formato "HHmm"
+//       int hour = int.tryParse(medicine.startTime!.substring(0, 2)) ?? 0;
+//       int minute = int.tryParse(medicine.startTime!.substring(2, 4)) ?? 0;
+//
+//       // Agendamento para os horários baseados no intervalo
+//       for (int i = 0; i < (24 / medicine.interval!).floor(); i++) {
+//         // Calcula a hora correta no ciclo
+//         int adjustedHour = (hour + (medicine.interval! * i)) % 24;
+//
+//         // Cria a data agendada baseada no fuso horário local
+//         DateTime now = DateTime.now();
+//         DateTime scheduledDate = DateTime(
+//           now.year,
+//           now.month,
+//           now.day,
+//           adjustedHour,
+//           minute,
+//         );
+//
+//         // Verificação se a data agendada está no futuro
+//         if (scheduledDate.isBefore(now) || scheduledDate.isAtSameMomentAs(now)) {
+//           scheduledDate = scheduledDate.add(Duration(days: 1));
+//           print("Erro: scheduledDate não está no futuro. Ajustando para o próximo ciclo.");
+//         }
+//
+//         // Ajusta para tz
+//         final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+//
+//         // Agendamento da notificação
+//         await flutterLocalNotificationsPlugin.zonedSchedule(
+//           i,
+//           '${medicine.medicineName} está programado para este horário.',
+//           medicine.medicineType.toString() != MedicineType.None.toString()
+//               ? 'It is time to take your ${medicine.medicineType!.toLowerCase()}, according to schedule'
+//               : 'It is time to take your medicine, according to schedule',
+//           tzScheduledDate,
+//           platformChannelSpecifics,
+//           androidScheduleMode: AndroidScheduleMode.exact, // Garante tempo exato
+//           uiLocalNotificationDateInterpretation:
+//           UILocalNotificationDateInterpretation.wallClockTime,
+//         );
+//       }
+//     } catch (e) {
+//       print("Erro ao agendar notificações: ${e.toString()}");
+//     }
+//   }
+// }
+  Future<void> scheduleNotification(Medicine medicine) async {
+    // Configurações específicas para Android
+    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+      'repeatDailyAtTime channel id',
+      'repeatDailyAtTime channel name',
+      importance: Importance.max,
+      ledColor: kOtherColor,
+      ledOffMs: 1000,
+      ledOnMs: 1000,
+      enableLights: true,
     );
+
+    // Configurações específicas para iOS
+    var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
+
+    // Configurações gerais
+    var platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    // Validação e conversão segura do horário inicial
+    if (medicine.startTime == null || medicine.startTime!.length < 4) {
+      print("Erro: startTime está vazio ou no formato inválido.");
+      return;
+    }
+
+    try {
+      // Extraindo hora e minuto do formato "HHmm"
+      int hour = int.tryParse(medicine.startTime!.substring(0, 2)) ?? 0;
+      int minute = int.tryParse(medicine.startTime!.substring(2, 4)) ?? 0;
+
+      // Agendamento para os horários baseados no intervalo
+      for (int i = 0; i < (24 / medicine.interval!).floor(); i++) {
+        if (hour + (medicine.interval! * i) > 23) {
+          hour = hour + (medicine.interval! * i) - 24;
+        } else {
+          hour = hour + (medicine.interval! * i);
+        }
+        // Cria a data agendada baseada no fuso horário local
+        DateTime now = DateTime.now();
+        DateTime scheduledDate = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          hour,
+          minute,
+        );
+
+        // Verificação se a data agendada está no futuro
+        if (scheduledDate.isBefore(now) || scheduledDate.isAtSameMomentAs(now)) {
+          scheduledDate = scheduledDate.add(const Duration(days: 1));
+        }
+
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          i,
+          '${medicine.medicineName} está programado para este horário.',
+          medicine.medicineType.toString() != MedicineType.None.toString()
+              ? 'It is time to take your ${medicine.medicineType!.toLowerCase()}, according to schedule'
+              : 'It is time to take your medicine, according to schedule',
+          tz.TZDateTime.from(scheduledDate, tz.local),
+          platformChannelSpecifics,
+          androidScheduleMode: AndroidScheduleMode.exact, // Garante tempo exato
+          uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.wallClockTime,
+        );
+      }
+    } catch (e) {
+      print("Erro ao agendar notificações: ${e.toString()}");
+    }
   }
 }
 
-*/
 
+/*
 class _SelectTimeState extends State<SelectTime> {
   TimeOfDay? selectedTime;
 
@@ -499,6 +601,9 @@ class _SelectTimeState extends State<SelectTime> {
   }
 }
 
+
+ */
+
 class IntervalSelection extends StatefulWidget {
   const IntervalSelection({Key? key}) : super(key: key);
 
@@ -525,30 +630,30 @@ class _IntervalSelectionState extends State<IntervalSelection> {
             itemHeight: 8.h,
             hint: _selected == 0
                 ? Text(
-                    'Select an Interval',
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: kPrimaryColor,
-                        ),
-                  )
+              'Select an Interval',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                color: kPrimaryColor,
+              ),
+            )
                 : null,
             elevation: 4,
             value: _selected == 0 ? null : _selected,
             items: _intervals.map(
-              (int value) {
+                  (int value) {
                 return DropdownMenuItem<int>(
                   value: value,
                   child: Text(
                     value.toString(),
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: kSecondaryColor,
-                        ),
+                      color: kSecondaryColor,
+                    ),
                   ),
                 );
               },
             ).toList(),
             onChanged: (newVal) {
               setState(
-                () {
+                    () {
                   _selected = newVal!;
                   newEntryBloc.updateInterval(newVal);
                 },
@@ -620,9 +725,9 @@ class MedicineTypeColumn extends StatelessWidget {
                 child: Text(
                   name,
                   style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                        color: isSelected ? Colors.white : kOtherColor,
-                        fontSize: 18.sp,
-                      ),
+                    color: isSelected ? Colors.white : kOtherColor,
+                    fontSize: 18.sp,
+                  ),
                 ),
               ),
             ),
@@ -650,8 +755,8 @@ class PanelTitle extends StatelessWidget {
             TextSpan(
               text: isRequired ? " *" : "",
               style: Theme.of(context).textTheme.labelMedium!.copyWith(
-                    color: kPrimaryColor,
-                  ),
+                color: kPrimaryColor,
+              ),
             ),
           ],
         ),

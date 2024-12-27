@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medicine/constants.dart';
-import 'package:medicine/global_bloc.dart';
+import 'package:medicine/utils/constants.dart';
+import 'package:medicine/utils/global_bloc.dart';
 import 'package:medicine/pages/home_page.dart';
 import 'package:medicine/pages/new_entry/new_entry_bloc.dart';
 import 'package:provider/provider.dart';

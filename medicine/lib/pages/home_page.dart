@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:medicine/constants.dart';
+import 'package:medicine/utils/constants.dart';
 import 'package:medicine/main.dart';
 import 'package:medicine/models/medicine.dart';
 import 'package:medicine/pages/medicine_details/medicine_details.dart';
@@ -8,7 +8,7 @@ import 'package:medicine/pages/new_entry/new_entry_page.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
-import '../global_bloc.dart';
+import '../utils/global_bloc.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

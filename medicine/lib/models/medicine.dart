@@ -4,7 +4,7 @@ class Medicine {
   final int? dosage;
   final String? medicineType;
   final int? interval;
-  final String? startTime;
+  late final String? startTime;
 
   Medicine(
       {this.notificationIDs,

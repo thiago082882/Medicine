@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:medicine/constants.dart';
-import 'package:medicine/global_bloc.dart';
+import 'package:medicine/utils/constants.dart';
+import 'package:medicine/utils/global_bloc.dart';
 import 'package:medicine/models/medicine.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
