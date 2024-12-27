@@ -696,7 +696,7 @@ class MedicineTypeColumn extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3.h),
-              color: isSelected ? kOtherColor : Colors.white,
+              color: isSelected ? kOtherColor :kInputFieldColor,
             ),
             child: Center(
               child: Padding(
@@ -707,7 +707,7 @@ class MedicineTypeColumn extends StatelessWidget {
                 child: SvgPicture.asset(
                   iconValue,
                   height: 7.h,
-                  color: isSelected ? Colors.white : kOtherColor,
+                  color: isSelected ? kInputFieldColor : kOtherColor,
                 ),
               ),
             ),

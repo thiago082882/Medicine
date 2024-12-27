@@ -112,20 +112,78 @@ class _MyAppState extends State<MyApp> {
               )
             )
           ),
-            timePickerTheme: TimePickerThemeData(
-              backgroundColor: kScaffoldColor,
-              hourMinuteColor: kTextColor,
-              hourMinuteTextColor: kScaffoldColor,
-              dayPeriodColor: kTextColor,
-              dayPeriodTextColor: kScaffoldColor,
-              dialBackgroundColor: kTextColor,
-              dialHandColor: kPrimaryColor,
-              dialTextColor: kScaffoldColor,
-              entryModeIconColor: kOtherColor,
-              dayPeriodTextStyle: GoogleFonts.aBeeZee(
-                fontSize: 8.sp,
+            // timePickerTheme: TimePickerThemeData(
+            //   backgroundColor: kScaffoldColor,
+            //   hourMinuteColor: kTextColor,
+            //   hourMinuteTextColor: kScaffoldColor,
+            //   dayPeriodColor: kTextColor,
+            //   dayPeriodTextColor: kScaffoldColor,
+            //   dialBackgroundColor: kTextColor,
+            //   dialHandColor: kPrimaryColor,
+            //   dialTextColor: kScaffoldColor,
+            //   entryModeIconColor: kOtherColor,
+            //   dayPeriodTextStyle: GoogleFonts.aBeeZee(
+            //     fontSize: 8.sp,
+            //   ),
+            // ),
+          textButtonTheme: TextButtonThemeData(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return kButtonPressedColor.withOpacity(0.8);
+                }
+                return kPrimaryColor;
+              }),
+              foregroundColor: WidgetStateProperty.all(kTextColor),
+              shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              )),
+              padding: WidgetStateProperty.all(const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              )),
+            ),
+          ),
+
+          timePickerTheme: TimePickerThemeData(
+            backgroundColor: kDialogBackground,
+            hourMinuteColor: kSecondaryColor,
+            hourMinuteTextColor: kTextColor,
+            dayPeriodColor: kAMPMBackground,
+            dayPeriodTextColor: kTextColor,
+            dialBackgroundColor: kDialogBackground,
+            dialHandColor: kDialogHandColor,
+            dialTextColor: kTextColor,
+            entryModeIconColor: kDialogHandColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            hourMinuteTextStyle: GoogleFonts.lato(
+              fontSize: 28.sp,
+              fontWeight: FontWeight.w600,
+              color: kTextColor,
+              letterSpacing: 1.5,
+            ),
+            dayPeriodTextStyle: GoogleFonts.lato(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w500,
+              color: kTextColor,
+            ),
+            helpTextStyle: GoogleFonts.lato(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: kTextLightColor,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: kInputFieldColor,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: kTextLightColor),
               ),
             ),
+          ),
+
         ),
         debugShowCheckedModeBanner: false,
         home: const HomePage(),

@@ -17,7 +17,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: kInputFieldColor,
       ),
       body: Padding(
         padding: EdgeInsets.all(2.h),
@@ -234,7 +234,7 @@ class MedicineCard extends StatelessWidget {
         padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 1.h, bottom: 1.h),
         margin: EdgeInsets.all(1.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: kInputFieldColor,
           borderRadius: BorderRadius.circular(2.h),
         ),
         child: Column(

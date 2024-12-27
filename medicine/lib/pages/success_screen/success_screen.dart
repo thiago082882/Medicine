@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:medicine/utils/constants.dart';
 
 
 class SuccessScreen extends StatefulWidget {
@@ -21,14 +22,14 @@ class _SuccessScreenState extends State<SuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Material( // Remova o `const` aqui
-      color: Colors.white,
+    return const Material(
+      color: kDialogBackground,
       child: Center(
-        child: FlareActor( // Ou RiveAnimation se usar o pacote Rive
-          'assets/animations/Success Check.flr', // Certifique-se de que o caminho está correto
+        child: FlareActor(
+          'assets/animations/Success Check.flr',
           alignment: Alignment.center,
           fit: BoxFit.contain,
-          animation: 'Untitled', // Certifique-se de que esta animação existe
+          animation: 'Untitled',
         ),
       ),
     );
