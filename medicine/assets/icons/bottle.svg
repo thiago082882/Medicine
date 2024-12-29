@@ -1,10 +1,2 @@
-<?xml version='1.0' encoding='utf-8'?>
-<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 512 512">
-  <g>
-    <g>
-      <path d="m409.1,150.1h-306.2c-11.3,0-20.4,9.1-20.4,20.4v310.1c0,11.3 9.1,20.4 20.4,20.4h306.3c11.3,0 20.4-9.1 20.4-20.4v-310.1c-0.1-11.3-9.2-20.4-20.5-20.4zm-20.4,310.1h-265.4v-269.3h265.4v269.3z"/>
-      <path d="m170,135.9h175c11.3,0 20.4-9.1 20.4-20.4v-84.1c0-11.3-9.1-20.4-20.4-20.4h-175c-11.3,0-20.4,9.1-20.4,20.4v84.1c-0.1,11.3 9.1,20.4 20.4,20.4zm20.4-84.1h134.2v43.3h-134.2v-43.3z"/>
-    </g>
-  </g>
-</svg>
+<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg fill="#000000" width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10,4a1,1,0,0,1,0-2h4a1,1,0,0,1,0,2ZM7.586,9.414,9.414,7.586A2,2,0,0,0,10,6.172V5h4V6.172a2,2,0,0,0,.586,1.414l1.828,1.828A2,2,0,0,1,17,10.828V21a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1V10.828A2,2,0,0,1,7.586,9.414ZM9,19.5a.5.5,0,0,0,.5.5h5a.5.5,0,0,0,.5-.5v-7a.5.5,0,0,0-.5-.5h-5a.5.5,0,0,0-.5.5Z"/></svg>

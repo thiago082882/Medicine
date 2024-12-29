@@ -52,7 +52,7 @@ class _SelectTimeState extends State<SelectTime> {
           child: Center(
             child: Text(
               _clicked == false
-                  ? "Select Time"
+                  ? "Selecione a hora"
                   : "${convertTime(_time.hour.toString())}:${convertTime(_time.minute.toString())}",
               style: Theme.of(context)
                   .textTheme

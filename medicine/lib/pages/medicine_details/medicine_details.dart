@@ -20,7 +20,7 @@ class _MedicineDetailsState extends State<MedicineDetails> {
     final GlobalBloc _globalBloc = Provider.of<GlobalBloc>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Details'),
+        title: const Text('Detalhes do Remédio'),
       ),
       body: Padding(
         padding: EdgeInsets.all(2.h),
@@ -38,12 +38,10 @@ class _MedicineDetailsState extends State<MedicineDetails> {
                   shape: const StadiumBorder(),
                 ),
                 onPressed: () {
-                  //open alert dialog box,+global bloc, later
-                  //cool its working
-                  openAlertBox(context,_globalBloc);
+                  openAlertBox(context, _globalBloc);
                 },
                 child: Text(
-                  'Delete',
+                  'Excluir',
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium!
@@ -59,49 +57,112 @@ class _MedicineDetailsState extends State<MedicineDetails> {
       ),
     );
   }
-  //lets delete a medicine from memory
 
-  openAlertBox(BuildContext context,GlobalBloc _globalBloc) {
+
+  openAlertBox(BuildContext context, GlobalBloc _globalBloc) {
     return showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: kScaffoldColor,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20.0),
-              bottomRight: Radius.circular(20.0),
-            ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
           ),
-          contentPadding: EdgeInsets.only(top: 1.h),
-          title: Text(
-            'Delete This Reminder?',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+          contentPadding: EdgeInsets.zero,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                 // color: kSecondaryColor.withOpacity(0.1),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20.0)),
+                ),
+                padding: EdgeInsets.all(20.0),
+                child: SvgPicture.asset(
+                  'assets/icons/remedio.svg',
+                  height: 90,
+                  width: 90,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Excluir este lembrete?',
+                      textAlign: TextAlign.center,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(
+                        color: kPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Você tem certeza de que deseja excluir este lembrete? Esta ação não pode ser desfeita.',
+                      textAlign: TextAlign.center,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Cancel',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                //global block to delete medicine,later
-                _globalBloc.removeMedicine(widget.medicine);
-                Navigator.popUntil(context, ModalRoute.withName('/'));
-              },
-              child: Text(
-                'OK',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium!
-                    .copyWith(color: kSecondaryColor),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.grey[300],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Cancelar',
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: kSecondaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    _globalBloc.removeMedicine(widget.medicine);
+                    Navigator.popUntil(context, ModalRoute.withName('/'));
+                  },
+                  child: Text(
+                    'Excluir',
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -113,46 +174,45 @@ class _MedicineDetailsState extends State<MedicineDetails> {
 class MainSection extends StatelessWidget {
   const MainSection({Key? key, this.medicine}) : super(key: key);
   final Medicine? medicine;
-  Hero makeIcon(double size) {
-    if (medicine!.medicineType == 'Bottle') {
-      return Hero(
-  tag: medicine!.medicineName! + medicine!.medicineType!,
-  child: SvgPicture.asset(
-    'assets/icons/bottle.svg',
-    colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn), 
-    height: 7.h,
-  ),
-);
 
-    } else if (medicine!.medicineType == 'Pill') {
+  Hero makeIcon(double size) {
+    if (medicine!.medicineType == 'Frasco') {
+      return Hero(
+        tag: medicine!.medicineName! + medicine!.medicineType!,
+        child: SvgPicture.asset(
+          'assets/icons/bottle.svg',
+          colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
+          height: 10.h, // Increased size
+        ),
+      );
+    } else if (medicine!.medicineType == 'Pilula') {
       return Hero(
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/pill.svg',
-         colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
-          height: 7.h,
+          colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
+          height: 10.h, // Increased size
         ),
       );
-    } else if (medicine!.medicineType == 'Syringe') {
+    } else if (medicine!.medicineType == 'Seringa') {
       return Hero(
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/syringe.svg',
-         colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
-          height: 7.h,
+          colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
+          height: 10.h, // Increased size
         ),
       );
-    } else if (medicine!.medicineType == 'Tablet') {
+    } else if (medicine!.medicineType == 'Comprimido') {
       return Hero(
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
           'assets/icons/tablet.svg',
           colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
-          height: 7.h,
+          height: 10.h, // Increased size
         ),
       );
     }
-    //in case of no medicine type icon selection
     return Hero(
       tag: medicine!.medicineName! + medicine!.medicineType!,
       child: Icon(
@@ -166,36 +226,39 @@ class MainSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        //lets try another one
-        //okz same here, the same problem, later i will solve that
-        makeIcon(7.h),
+        makeIcon(10.h), // Increased size
         SizedBox(
-          width: 2.w,
+          width: 6.w, // Increased spacing
         ),
-        Column(
-          children: [
-            Hero(
-              tag: medicine!.medicineName!,
-              child: Material(
-                color: Colors.transparent,
-                child: MainInfoTab(
-                    fieldTitle: 'Medicine Name',
-                    fieldInfo: medicine!.medicineName!),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Hero(
+                tag: medicine!.medicineName!,
+                child: Material(
+                  color: Colors.transparent,
+                  child: MainInfoTab(
+                    fieldTitle: 'Nome do Remédio',
+                    fieldInfo: medicine!.medicineName!,
+                  ),
+                ),
               ),
-            ),
-            MainInfoTab(
-                fieldTitle: 'Dosage',
-                fieldInfo: medicine!.dosage == 0
-                    ? 'Not Specified'
-                    : "${medicine!.dosage} mg"),
-          ],
-        )
+              MainInfoTab(
+                  fieldTitle: 'Dosagem',
+                  fieldInfo: medicine!.dosage == 0
+                      ? 'Não especificado'
+                      : "${medicine!.dosage} mg"),
+            ],
+          ),
+        ),
       ],
     );
   }
 }
+
 
 class MainInfoTab extends StatelessWidget {
   const MainInfoTab(
@@ -203,29 +266,28 @@ class MainInfoTab extends StatelessWidget {
       : super(key: key);
   final String fieldTitle;
   final String fieldInfo;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 40.w,
+      width: double.infinity,
       height: 10.h,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              fieldTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-              
-            ),
-            SizedBox(
-              height: 0.3.h,
-            ),
-            Text(
-              fieldInfo,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            fieldTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          SizedBox(
+            height: 0.3.h,
+          ),
+          Text(
+            fieldInfo,
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                overflow: TextOverflow.ellipsis),
+          ),
+        ],
       ),
     );
   }
@@ -234,26 +296,27 @@ class MainInfoTab extends StatelessWidget {
 class ExtendedSection extends StatelessWidget {
   const ExtendedSection({Key? key, this.medicine}) : super(key: key);
   final Medicine? medicine;
+
   @override
   Widget build(BuildContext context) {
     return ListView(
       shrinkWrap: true,
       children: [
         ExtendedInfoTab(
-          fieldTitle: 'Medicine Type ',
+          fieldTitle: 'Tipo de Remédio',
           fieldInfo: medicine!.medicineType! == 'None'
-              ? 'Not Specified'
+              ? 'Não especificado'
               : medicine!.medicineType!,
         ),
         ExtendedInfoTab(
-          fieldTitle: 'Dose Interval',
+          fieldTitle: 'Intervalo de Dose',
           fieldInfo:
-              'Every ${medicine!.interval} hours   | ${medicine!.interval == 24 ? "One time a day" : "${(24 / medicine!.interval!).floor()} times a day"}',
+          'A cada ${medicine!.interval} horas   | ${medicine!.interval == 24 ? "Uma vez por dia" : "${(24 / medicine!.interval!).floor()} vezes por dia"}',
         ),
         ExtendedInfoTab(
-          fieldTitle: 'Start Time',
+          fieldTitle: 'Hora de Início',
           fieldInfo:
-              '${medicine!.startTime![0]}${medicine!.startTime![1]}:${medicine!.startTime![2]}${medicine!.startTime![3]}',
+          '${medicine!.startTime![0]}${medicine!.startTime![1]}:${medicine!.startTime![2]}${medicine!.startTime![3]}',
         ),
       ],
     );
@@ -279,15 +342,15 @@ class ExtendedInfoTab extends StatelessWidget {
             child: Text(
               fieldTitle,
               style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    color: kTextColor,
-                  ),
+                color: kTextColor,
+              ),
             ),
           ),
           Text(
             fieldInfo,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  color: kSecondaryColor,
-                ),
+              color: kSecondaryColor,
+            ),
           ),
         ],
       ),

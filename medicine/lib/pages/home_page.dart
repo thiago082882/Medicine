@@ -18,23 +18,22 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kInputFieldColor,
+        title: const Text('Minha Dose Diária'),
+        centerTitle: true,
+        elevation: 2,
       ),
       body: Padding(
         padding: EdgeInsets.all(2.h),
         child: Column(
           children: [
             const TopContainer(),
-            SizedBox(
-              height: 2.h,
-            ),
-
-            Flexible(child: BottomContainer()),
+            SizedBox(height: 2.h),
+            const Expanded(child: BottomContainer()),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navega para a página de novo cadastro
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -45,14 +44,13 @@ class HomePage extends StatelessWidget {
         backgroundColor: kPrimaryColor,
         child: Icon(
           Icons.add_outlined,
-          color: Colors.white,
           size: 30.sp,
+          color: Colors.white,
         ),
       ),
     );
   }
 }
-
 
 class TopContainer extends StatelessWidget {
   const TopContainer({Key? key}) : super(key: key);
@@ -60,44 +58,43 @@ class TopContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GlobalBloc globalBloc = Provider.of<GlobalBloc>(context);
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          alignment: Alignment.topLeft,
-          padding: EdgeInsets.only(
-            bottom: 1.h,
-          ),
-          child: Text(
-            'Worry less. \nLive healthier.',
-            textAlign: TextAlign.start,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-        ),
-        Container(
-          alignment: Alignment.topLeft,
+        Padding(
           padding: EdgeInsets.only(bottom: 1.h),
           child: Text(
-            'Welcome to Daily Dose.',
-            style: Theme.of(context).textTheme.bodyMedium,
+            'Cuide-se. \nViva mais saudável.',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: kPrimaryColor,
+            ),
           ),
         ),
-        SizedBox(
-          height: 2.h,
+        Padding(
+          padding: EdgeInsets.only(bottom: 1.h),
+          child: Text(
+            'Bem-vindo(a) ao Minha Dose Diária.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.grey[700],
+            ),
+          ),
         ),
-        //lets show number of saved medicines from shared preferences
+        SizedBox(height: 2.h),
         StreamBuilder<List<Medicine>>(
-            stream: globalBloc.medicineList$,
-            builder: (context, snapshot) {
-              return Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.only(bottom: 1.h),
-                child: Text(
-                  !snapshot.hasData ? '0' : snapshot.data!.length.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              );
-            }),
+          stream: globalBloc.medicineList$,
+          builder: (context, snapshot) {
+            final int medicineCount = snapshot.data?.length ?? 0;
+            return Text(
+              '$medicineCount medicamento(s) salvo(s)',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: kPrimaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -108,98 +105,70 @@ class BottomContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //later we will use condition to show the save data
-    // return Center(
-    //   child: Text(
-    //     'No Medicine',
-    //     textAlign: TextAlign.center,
-    //     style: Theme.of(context).textTheme.headline3,
-    //   ),
-
     final GlobalBloc globalBloc = Provider.of<GlobalBloc>(context);
 
-    return StreamBuilder(
+    return StreamBuilder<List<Medicine>>(
       stream: globalBloc.medicineList$,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          //if no data is saved
-          return Container();
-        } else if (snapshot.data!.isEmpty) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(
             child: Text(
-              'No Medicine',
-              style: Theme.of(context).textTheme.headlineMedium,
+              'Nenhum medicamento salvo.',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
             ),
-          );
-        } else {
-          return GridView.builder(
-            padding: EdgeInsets.only(top: 1.h),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-            ),
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              return MedicineCard(medicine: snapshot.data![index]);
-            },
           );
         }
+
+        return GridView.builder(
+          padding: EdgeInsets.only(top: 1.h),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.9,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            return MedicineCard(medicine: snapshot.data![index]);
+          },
+        );
       },
     );
   }
 }
+
 class MedicineCard extends StatelessWidget {
   const MedicineCard({Key? key, required this.medicine}) : super(key: key);
+
   final Medicine medicine;
-  //for getting the current details of the saved items
 
-  //first we need to get the medicine type icon
-  //lets make a function
+  Hero makeIcon() {
+    final iconPath = {
+      'Frasco': 'assets/icons/bottle.svg',
+      'Pilula': 'assets/icons/pill.svg',
+      'Seringa': 'assets/icons/syringe.svg',
+      'Comprimido': 'assets/icons/tablet.svg',
+    }[medicine.medicineType];
 
-  Hero makeIcon(double size) {
-    if (medicine.medicineType == 'Bottle') {
+    if (iconPath != null) {
       return Hero(
-        tag: medicine.medicineName! + medicine.medicineType!,
+        tag: '${medicine.medicineName}-${medicine.medicineType}',
         child: SvgPicture.asset(
-          'assets/icons/bottle.svg',
-          colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
-          height: 7.h,
-        ),
-      );
-    } else if (medicine.medicineType == 'Pill') {
-      return Hero(
-        tag: medicine.medicineName! + medicine.medicineType!,
-        child: SvgPicture.asset(
-          'assets/icons/pill.svg',
-           colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
-          height: 7.h,
-        ),
-      );
-    } else if (medicine.medicineType == 'Syringe') {
-      return Hero(
-        tag: medicine.medicineName! + medicine.medicineType!,
-        child: SvgPicture.asset(
-          'assets/icons/syringe.svg',
-           colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
-          height: 7.h,
-        ),
-      );
-    } else if (medicine.medicineType == 'Tablet') {
-      return Hero(
-        tag: medicine.medicineName! + medicine.medicineType!,
-        child: SvgPicture.asset(
-          'assets/icons/tablet.svg',
-           colorFilter: ColorFilter.mode(kOtherColor, BlendMode.srcIn),
+          iconPath,
+          colorFilter: const ColorFilter.mode(kOtherColor, BlendMode.srcIn),
           height: 7.h,
         ),
       );
     }
-    //in case of no medicine type icon selection
+
     return Hero(
-      tag: medicine.medicineName! + medicine.medicineType!,
+      tag: '${medicine.medicineName}-default',
       child: Icon(
         Icons.error,
+        size: 7.h,
         color: kOtherColor,
-        size: size,
       ),
     );
   }
@@ -207,66 +176,48 @@ class MedicineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      highlightColor: Colors.white,
-      splashColor: Colors.grey,
       onTap: () {
-        //go to details activity with animation, later
-
-        Navigator.of(context).push(
-          PageRouteBuilder<void>(
-            pageBuilder: (BuildContext context, Animation<double> animation,
-                Animation<double> secondaryAnimation) {
-              return AnimatedBuilder(
-                animation: animation,
-                builder: (context, Widget? child) {
-                  return Opacity(
-                    opacity: animation.value,
-                    child: MedicineDetails(medicine),
-                  );
-                },
-              );
-            },
-            transitionDuration: const Duration(milliseconds: 500),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MedicineDetails(medicine),
           ),
         );
       },
       child: Container(
-        padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 1.h, bottom: 1.h),
-        margin: EdgeInsets.all(1.h),
+        padding: EdgeInsets.all(2.h),
         decoration: BoxDecoration(
           color: kInputFieldColor,
           borderRadius: BorderRadius.circular(2.h),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(),
-            //call the function here icon type
-            //later we will the icon issue
-            makeIcon(7.h),
-            const Spacer(),
-            //hero tag animation, later
-            Hero(
-              tag: medicine.medicineName!,
-              child: Text(
-                medicine.medicineName!,
-                overflow: TextOverflow.fade,
-                textAlign: TextAlign.start,
-                style: Theme.of(context).textTheme.titleMedium
+            makeIcon(),
+            SizedBox(height: 1.h),
+            Text(
+              medicine.medicineName!,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(
-              height: 0.3.h,
-            ),
-            //time interval data with condition, later
+            SizedBox(height: 0.5.h),
             Text(
               medicine.interval == 1
-                  ? "Every ${medicine.interval} hour"
-                  : "Every ${medicine.interval} hour",
-              overflow: TextOverflow.fade,
-              textAlign: TextAlign.start,
-              style: Theme.of(context).textTheme.bodyMedium,
+                  ? 'A cada ${medicine.interval} hora'
+                  : 'A cada ${medicine.interval} horas',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
             ),
           ],
         ),

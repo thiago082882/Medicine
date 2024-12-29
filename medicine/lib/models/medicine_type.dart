@@ -1,1 +1,1 @@
-enum MedicineType { Bottle, Pill, Syringe, Tablet, None }
+enum MedicineType { Frasco, Pilula, Seringa, Comprimido, None }

@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:medicine/utils/constants.dart';
 import 'package:medicine/utils/global_bloc.dart';
 import 'package:medicine/pages/home_page.dart';
-import 'package:medicine/pages/new_entry/new_entry_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
@@ -35,6 +35,17 @@ class _MyAppState extends State<MyApp> {
       child: Sizer(builder: (context, orientation, deviceType) {
       return MaterialApp(
         title: 'Control medication',
+        debugShowCheckedModeBanner: false,
+        supportedLocales: const [
+          Locale('en', 'US'),
+          Locale('pt', 'BR'),
+        ],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        locale: const Locale('pt', 'BR'),
         //theme customization
         theme: ThemeData.dark().copyWith(
           primaryColor: kPrimaryColor,
@@ -112,20 +123,6 @@ class _MyAppState extends State<MyApp> {
               )
             )
           ),
-            // timePickerTheme: TimePickerThemeData(
-            //   backgroundColor: kScaffoldColor,
-            //   hourMinuteColor: kTextColor,
-            //   hourMinuteTextColor: kScaffoldColor,
-            //   dayPeriodColor: kTextColor,
-            //   dayPeriodTextColor: kScaffoldColor,
-            //   dialBackgroundColor: kTextColor,
-            //   dialHandColor: kPrimaryColor,
-            //   dialTextColor: kScaffoldColor,
-            //   entryModeIconColor: kOtherColor,
-            //   dayPeriodTextStyle: GoogleFonts.aBeeZee(
-            //     fontSize: 8.sp,
-            //   ),
-            // ),
           textButtonTheme: TextButtonThemeData(
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
@@ -185,7 +182,6 @@ class _MyAppState extends State<MyApp> {
           ),
 
         ),
-        debugShowCheckedModeBanner: false,
         home: const HomePage(),
       );
     }

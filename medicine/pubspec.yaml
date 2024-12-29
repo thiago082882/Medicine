@@ -45,6 +45,7 @@ dependencies:
   flutter_timezone: ^1.0.0
   flare_flutter: ^3.0.2
   timezone: ^0.9.1
+  flutter_localization: ^0.3.0
 
 
 
